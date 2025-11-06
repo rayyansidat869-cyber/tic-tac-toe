@@ -5,7 +5,7 @@ let gameActive = true;
 
 // ===== Sounds =====
 // Make sure these files exist in your project folder
-const clickSound = new Audio('click.mp3');   // played on every move
+const clickSound = new Audio('mouse-click-sound.mp3');   // played on every move
 const yaySound = new Audio('yay.mp3');       // played when player wins
 const loseSound = new Audio('lose.mp3');     // played when computer wins
 const drawSound = new Audio('draw.mp3');     // played on draw
