@@ -4,7 +4,7 @@ let currentPlayer = 'X';
 let gameActive = true;
 
 // ===== Sounds =====
-const clickSound = new Audio('click.mp3'); // put click.mp3 in your project folder
+const clickSound = new Audio('mouse-click-sound.mp3'); // put click.mp3 in your project folder
 
 // ===== Winning Patterns =====
 const winPatterns = [
