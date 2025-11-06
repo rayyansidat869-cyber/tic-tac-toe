@@ -4,7 +4,11 @@ let currentPlayer = 'X';
 let gameActive = true;
 
 // ===== Sounds =====
-const clickSound = new Audio('mouse-click-sound.mp3'); // put click.mp3 in your project folder
+// Make sure these files exist in your project folder
+const clickSound = new Audio('click.mp3');   // played on every move
+const yaySound = new Audio('yay.mp3');       // played when player wins
+const loseSound = new Audio('lose.mp3');     // played when computer wins
+const drawSound = new Audio('draw.mp3');     // played on draw
 
 // ===== Winning Patterns =====
 const winPatterns = [
@@ -59,12 +63,16 @@ function computerMove() {
     const empty = cells.map((v, i) => v === '' ? i : null).filter(v => v !== null);
     move = empty[Math.floor(Math.random() * empty.length)];
   } else if (mode === 'hard') {
-    move = getBestMoveLimited(); // depth-limited minimax
+    move = getBestMoveLimited();
   } else {
-    move = getBestMove(); // full-depth minimax
+    move = getBestMove();
   }
 
   if (move === undefined) return;
+
+  // Play click sound
+  clickSound.currentTime = 0;
+  clickSound.play();
 
   cells[move] = 'O';
   renderBoard();
@@ -158,12 +166,24 @@ function checkWinner() {
     if (cells[a] && cells[a] === cells[b] && cells[a] === cells[c]) {
       gameActive = false;
       document.getElementById('status').textContent = `${cells[a]} wins!`;
+
+      // Play sounds depending on winner
+      if (cells[a] === 'X') {
+        yaySound.currentTime = 0;
+        yaySound.play();
+      } else {
+        loseSound.currentTime = 0;
+        loseSound.play();
+      }
+
       return true;
     }
   }
   if (!cells.includes('')) {
     gameActive = false;
     document.getElementById('status').textContent = "It's a draw!";
+    drawSound.currentTime = 0;
+    drawSound.play();
     return true;
   }
   return false;
@@ -180,4 +200,3 @@ function resetGame() {
 
 // ===== Initialize =====
 renderBoard();
-
