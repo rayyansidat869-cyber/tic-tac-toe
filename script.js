@@ -3,11 +3,12 @@ let cells = Array(9).fill('');
 let currentPlayer = 'X';
 let gameActive = true;
 
-// ===== Sounds =====
-// Make sure these files exist in your project folder
-const clickSound = new Audio('mouse-click-sound.mp3');   // played on every move
-const yaySound = new Audio('kids-saying-yay-sound-effect_3.mp3');       // played when player wins
+// ===== Trophy Counter =====
+let trophies = 0;
 
+// ===== Sounds =====
+const clickSound = new Audio('click.mp3');   // short tap sound
+const yaySound = new Audio('yay.mp3');       // celebratory sound
 
 // ===== Winning Patterns =====
 const winPatterns = [
@@ -27,7 +28,6 @@ function renderBoard() {
     if (cell === 'X') cellDiv.style.color = '#00e5ff';
     if (cell === 'O') cellDiv.style.color = '#ff4081';
 
-    // Support both click and touch
     cellDiv.addEventListener('click', () => handleClick(index));
     cellDiv.addEventListener('touchstart', () => handleClick(index));
 
@@ -39,7 +39,6 @@ function renderBoard() {
 function handleClick(index) {
   if (!gameActive || cells[index]) return;
 
-  // Play click sound
   clickSound.currentTime = 0;
   clickSound.play();
 
@@ -67,9 +66,6 @@ function computerMove() {
     move = getBestMove();
   }
 
-  if (move === undefined) return;
-
-  // Play click sound
   clickSound.currentTime = 0;
   clickSound.play();
 
@@ -88,7 +84,7 @@ function getBestMoveLimited() {
   for (let i = 0; i < 9; i++) {
     if (cells[i] === '') {
       cells[i] = 'O';
-      let score = minimax(cells, 0, false, 3); // limit depth to 3
+      let score = minimax(cells, 0, false, 3);
       cells[i] = '';
       if (score > bestScore) {
         bestScore = score;
@@ -166,36 +162,9 @@ function checkWinner() {
       gameActive = false;
       document.getElementById('status').textContent = `${cells[a]} wins!`;
 
-      // Play sounds depending on winner
+      // Award trophies if player wins
       if (cells[a] === 'X') {
-        yaySound.currentTime = 0;
-        yaySound.play();
-      } else {
-        loseSound.currentTime = 0;
-        loseSound.play();
-      }
-
-      return true;
-    }
-  }
-  if (!cells.includes('')) {
-    gameActive = false;
-    document.getElementById('status').textContent = "It's a draw!";
-    drawSound.currentTime = 0;
-    drawSound.play();
-    return true;
-  }
-  return false;
-}
-
-// ===== Reset Game =====
-function resetGame() {
-  cells = Array(9).fill('');
-  currentPlayer = 'X';
-  gameActive = true;
-  document.getElementById('status').textContent = "Your turn";
-  renderBoard();
-}
-
-// ===== Initialize =====
-renderBoard();
+        const mode = document.getElementById('mode').value;
+        if (mode === 'easy') trophies += 1;
+        else if (mode === 'hard') trophies += 5;
+        else if (mode === 'impossible
