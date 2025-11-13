@@ -168,3 +168,6 @@ function checkWinner() {
         if (mode === 'easy') trophies += 1;
         else if (mode === 'hard') trophies += 5;
         else if (mode === 'impossible
+    // ===== Initialize =====
+renderBoard();
+
