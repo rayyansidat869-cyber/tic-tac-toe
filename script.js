@@ -167,8 +167,30 @@ function checkWinner() {
         const mode = document.getElementById('mode').value;
         if (mode === 'easy') trophies += 1;
         else if (mode === 'hard') trophies += 5;
-        else if (mode === 'impossible
-  function resetGame() {
+        else if (mode === 'impossible') trophies += 1000;
+
+        document.getElementById('trophies').textContent = `Trophies: ${trophies} 🏆`;
+
+        yaySound.currentTime = 0;
+        yaySound.play();
+      }
+
+      return true;
+    }
+  }
+
+  // Draw
+  if (!cells.includes('')) {
+    gameActive = false;
+    document.getElementById('status').textContent = "It's a draw!";
+    return true;
+  }
+
+  return false;
+}
+
+// ===== Reset Game =====
+function resetGame() {
   cells = Array(9).fill('');
   currentPlayer = 'X';
   gameActive = true;
@@ -176,4 +198,12 @@ function checkWinner() {
   renderBoard();
 }
 
+// ===== Reset Trophies =====
+function resetTrophies() {
+  trophies = 0;
+  document.getElementById('trophies').textContent = `Trophies: ${trophies} 🏆`;
+}
+
+// ===== Initialize =====
+renderBoard();
 
