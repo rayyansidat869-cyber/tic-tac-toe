@@ -168,6 +168,12 @@ function checkWinner() {
         if (mode === 'easy') trophies += 1;
         else if (mode === 'hard') trophies += 5;
         else if (mode === 'impossible
-    // ===== Initialize =====
-renderBoard();
+  function resetGame() {
+  cells = Array(9).fill('');
+  currentPlayer = 'X';
+  gameActive = true;
+  document.getElementById('status').textContent = "Your turn";
+  renderBoard();
+}
+
 
