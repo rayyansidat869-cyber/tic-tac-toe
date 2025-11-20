@@ -2,13 +2,17 @@
 let cells = Array(9).fill('');
 let currentPlayer = 'X';
 let gameActive = true;
-
-// ===== Trophy Counter =====
 let trophies = 0;
 
 // ===== Sounds =====
-const clickSound = new Audio('click.mp3');   // short tap sound
-const yaySound = new Audio('yay.mp3');       // celebratory sound
+const clickSound = new Audio('click.mp3');
+const yaySound = new Audio('yay.mp3');
+
+// ===== Supabase Setup =====
+// Replace with your Supabase project URL and anon key
+const supabaseUrl = "https://YOUR_PROJECT.supabase.co";
+const supabaseKey = "YOUR_ANON_KEY";
+const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
 // ===== Winning Patterns =====
 const winPatterns = [
@@ -162,7 +166,6 @@ function checkWinner() {
       gameActive = false;
       document.getElementById('status').textContent = `${cells[a]} wins!`;
 
-      // Award trophies if player wins
       if (cells[a] === 'X') {
         const mode = document.getElementById('mode').value;
         if (mode === 'easy') trophies += 1;
@@ -173,13 +176,17 @@ function checkWinner() {
 
         yaySound.currentTime = 0;
         yaySound.play();
+
+        const playerName = prompt("Enter your name:");
+        if (playerName) {
+          saveScore(playerName, trophies);
+        }
       }
 
       return true;
     }
   }
 
-  // Draw
   if (!cells.includes('')) {
     gameActive = false;
     document.getElementById('status').textContent = "It's a draw!";
@@ -204,6 +211,40 @@ function resetTrophies() {
   document.getElementById('trophies').textContent = `Trophies: ${trophies} 🏆`;
 }
 
+// ===== Supabase Save Score =====
+async function saveScore(playerName, trophies) {
+  const { data, error } = await supabase
+    .from('leaderboard')
+    .insert([{ name: playerName, trophies: trophies }]);
+
+  if (error) {
+    console.error("Error saving score:", error);
+  } else {
+    console.log("Score saved:", data);
+  }
+}
+
+// ===== Supabase Load Leaderboard =====
+async function loadLeaderboard() {
+  const { data, error } = await supabase
+    .from('leaderboard')
+    .select('*')
+    .order('trophies', { ascending: false })
+    .limit(10);
+
+  if (error) {
+    console.error("Error loading leaderboard:", error);
+    return;
+  }
+
+  const list = document.getElementById('leaderboard');
+  list.innerHTML = '';
+  data.forEach(entry => {
+    const li = document.createElement('li');
+    li.textContent = `${entry.name} — ${entry.trophies} 🏆`;
+    list.appendChild(li);
+  });
+}
+
 // ===== Initialize =====
 renderBoard();
-
