@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Tic Tac Toe</title>
   <link rel="stylesheet" href="style.css" />
+    <script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  // Replace with your Supabase project URL and anon key
+  const supabaseUrl = "https://YOUR_PROJECT.supabase.co";
+  const supabaseKey = "YOUR_ANON_KEY";
+  window.supabase = createClient(supabaseUrl, supabaseKey);
+</script>
+
 </head>
 <body>
   <h1>Tic Tac Toe</h1>
@@ -23,14 +32,6 @@
 
   <button onclick="resetGame()">Restart</button>
   <button onclick="resetTrophies()">Reset Trophies</button>
-  <script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-  // Replace with your Supabase project URL and anon key
-  const supabaseUrl = "https://YOUR_PROJECT.supabase.co";
-  const supabaseKey = "YOUR_ANON_KEY";
-  window.supabase = createClient(supabaseUrl, supabaseKey);
-</script>
 
 
   <script src="script.js"></script>
