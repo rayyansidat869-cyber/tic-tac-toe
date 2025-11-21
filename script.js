@@ -257,5 +257,10 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById('trophies').textContent = `Trophies: ${trophies} 🏆`;
 });
 
+supabase.from('leaderboard').select('*').then(res => {
+  console.log("Connection test:", res);
+});
+
+
 
 
