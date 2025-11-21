@@ -1,3 +1,5 @@
+
+const supabase = window.supabaseClient;
 // ===== Game State =====
 let cells = Array(9).fill('');
 let currentPlayer = 'X';
@@ -10,7 +12,7 @@ const yaySound = new Audio('kids-saying-yay-sound-effect_3.mp3');
 
 // ===== Supabase Setup =====
 // Supabase client is exposed from index.html as window.supabaseClient
-const supabase = window.supabaseClient;
+
 
 // ===== Winning Patterns =====
 const winPatterns = [
