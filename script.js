@@ -6,7 +6,7 @@ let trophies = 0;
 
 // ===== Sounds =====
 const clickSound = new Audio('click.mp3');
-const yaySound = new Audio('yay.mp3');
+const yaySound = new Audio('kids-saying-yay-sound-effect_3.mp3');
 
 // ===== Supabase Setup =====
 // Supabase client is exposed from index.html as window.supabaseClient
