@@ -5,7 +5,7 @@ let gameActive = true;
 let trophies = 0;
 
 // ===== Sounds =====
-const clickSound = new Audio('click.mp3');
+const clickSound = new Audio('mouse-click-sound.mp3');
 const yaySound = new Audio('kids-saying-yay-sound-effect_3.mp3');
 
 // ===== Supabase Setup =====
