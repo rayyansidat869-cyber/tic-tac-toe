@@ -5,16 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Tic Tac Toe</title>
   <link rel="stylesheet" href="style.css" />
-  
-    <script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-  // Replace with your Supabase project URL and anon key
-  const supabaseUrl = "https://YOUR_PROJECT.supabase.co";
-  const supabaseKey = "YOUR_ANON_KEY";
-  window.supabase = createClient(supabaseUrl, supabaseKey);
-</script>
+  <!-- Supabase client -->
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
+    const supabaseUrl = "https://YOUR_PROJECT.supabase.co";   <!-- replace -->
+    const supabaseKey = "YOUR_ANON_KEY";                     <!-- replace -->
+    window.supabaseClient = createClient(supabaseUrl, supabaseKey);
+  </script>
 </head>
 <body>
   <h1>Tic Tac Toe</h1>
@@ -26,19 +25,23 @@
     <option value="impossible">Impossible</option>
   </select>
 
+  <!-- Game board -->
   <div class="board" id="board"></div>
 
+  <!-- Status + trophies -->
   <p id="status">Your turn</p>
   <p id="trophies">Trophies: 0 🏆</p>
-  <button onclick="loadLeaderboard()">Show Leaderboard</button>
-<ul id="leaderboard"></ul>
 
-
+  <!-- Controls -->
   <button onclick="resetGame()">Restart</button>
   <button onclick="resetTrophies()">Reset Trophies</button>
+  <button onclick="loadLeaderboard()">Show Leaderboard</button>
 
+  <!-- Leaderboard -->
+  <h2>Leaderboard</h2>
+  <ul id="leaderboard"></ul>
 
+  <!-- Game logic -->
   <script src="script.js"></script>
 </body>
 </html>
-
