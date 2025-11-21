@@ -9,10 +9,8 @@ const clickSound = new Audio('click.mp3');
 const yaySound = new Audio('yay.mp3');
 
 // ===== Supabase Setup =====
-// Replace with your Supabase project URL and anon key
-const supabaseUrl = "https://YOUR_PROJECT.supabase.co";
-const supabaseKey = "YOUR_ANON_KEY";
-const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+// Supabase client is exposed from index.html as window.supabaseClient
+const supabase = window.supabaseClient;
 
 // ===== Winning Patterns =====
 const winPatterns = [
@@ -48,6 +46,7 @@ function handleClick(index) {
 
   cells[index] = currentPlayer;
   renderBoard();
+
   if (checkWinner()) return;
 
   currentPlayer = 'O';
@@ -70,11 +69,14 @@ function computerMove() {
     move = getBestMove();
   }
 
+  if (move === undefined) return;
+
   clickSound.currentTime = 0;
   clickSound.play();
 
   cells[move] = 'O';
   renderBoard();
+
   if (checkWinner()) return;
 
   currentPlayer = 'X';
@@ -248,3 +250,4 @@ async function loadLeaderboard() {
 
 // ===== Initialize =====
 renderBoard();
+
