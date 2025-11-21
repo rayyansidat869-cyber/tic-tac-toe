@@ -249,5 +249,11 @@ async function loadLeaderboard() {
 }
 
 // ===== Initialize =====
-renderBoard();
+document.addEventListener("DOMContentLoaded", () => {
+  renderBoard();
+  document.getElementById('status').textContent = "Your turn";
+  document.getElementById('trophies').textContent = `Trophies: ${trophies} 🏆`;
+});
+
+
 
