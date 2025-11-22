@@ -1,14 +1,12 @@
-// Connect to Supabase (client created in index.html)
 const supabase = window.supabaseClient;
 
-// Game state
 let board = [];
 let currentPlayer = "X";
 let trophies = 0;
-let playerName = null; // store player name once
+let playerName = null;
 
-// Initialize board
 function initBoard() {
+  console.log("initBoard called");
   board = Array(9).fill(null);
   const boardDiv = document.getElementById("board");
   boardDiv.innerHTML = "";
@@ -21,7 +19,6 @@ function initBoard() {
   document.getElementById("status").textContent = "Your turn";
 }
 
-// Handle moves
 function makeMove(index) {
   if (board[index] || checkWinner()) return;
   board[index] = currentPlayer;
@@ -32,29 +29,22 @@ function makeMove(index) {
     if (currentPlayer === "X") {
       trophies++;
       document.getElementById("trophies").textContent = `Trophies: ${trophies} 🏆`;
-
-      // Ask for name only once
       if (!playerName) {
         playerName = prompt("Enter your name:");
       }
-
-      // Save/update score immediately
       saveScore(playerName, trophies);
     }
     return;
   }
 
-  // Switch turn
   currentPlayer = currentPlayer === "X" ? "O" : "X";
   document.getElementById("status").textContent = `${currentPlayer}'s turn`;
 
-  // Computer waits 1 second before moving
   if (currentPlayer === "O") {
     setTimeout(computerMove, 1000);
   }
 }
 
-// Render board
 function renderBoard() {
   const cells = document.querySelectorAll(".cell");
   board.forEach((val, i) => {
@@ -62,23 +52,20 @@ function renderBoard() {
   });
 }
 
-// Check winner
 function checkWinner() {
   const wins = [
-    [0,1,2],[3,4,5],[6,7,8], // rows
-    [0,3,6],[1,4,7],[2,5,8], // cols
-    [0,4,8],[2,4,6]          // diagonals
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
   ];
   return wins.some(([a,b,c]) => board[a] && board[a] === board[b] && board[a] === board[c]);
 }
 
-// Reset game
 function resetGame() {
   currentPlayer = "X";
   initBoard();
 }
-
-// -------------------- COMPUTER AI --------------------
+window.resetGame = resetGame;
 
 function getDifficulty() {
   return document.getElementById("mode").value;
@@ -191,7 +178,6 @@ function checkWinnerFor(player, b) {
 
 // -------------------- SUPABASE --------------------
 
-// Save score to Supabase
 async function saveScore(name, trophies) {
   const { data, error } = await supabase
     .from("leaderboard")
@@ -204,7 +190,6 @@ async function saveScore(name, trophies) {
   }
 }
 
-// Load leaderboard
 async function loadLeaderboard() {
   const list = document.getElementById("leaderboard");
   list.innerHTML = "";
@@ -232,7 +217,6 @@ async function loadLeaderboard() {
   });
 }
 
-// Load player trophies on page start
 async function loadPlayerTrophies() {
   if (!playerName) {
     playerName = prompt("Enter your name:");
@@ -250,15 +234,15 @@ async function loadPlayerTrophies() {
   } else if (data) {
     trophies = data.trophies;
   } else {
-    trophies = 0; // new player
+    trophies = 0;
   }
 
   document.getElementById("trophies").textContent = `Trophies: ${trophies} 🏆`;
+}
 
-
-  // -------------------- START GAME --------------------
+// -------------------- START GAME --------------------
 document.addEventListener("DOMContentLoaded", async () => {
-  initBoard();             // render the board
-  await loadPlayerTrophies(); // restore trophies from Supabase
+  initBoard();
+  await loadPlayerTrophies();
 });
 
