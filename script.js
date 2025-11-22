@@ -70,22 +70,13 @@ function resetTrophies() {
   document.getElementById("trophies").textContent = "Trophies: 0 🏆";
 }
 
-// Save score to Supabase only if trophies >= 20
+// Save score to Supabase
 async function saveScore(name, trophies) {
-  if (trophies < 20) {
-    console.log("Not enough trophies to enter leaderboard.");
-    return; // skip insert
-  }
-
   const { error } = await supabase.from("leaderboard").insert([{ name, trophies }]);
-  if (error) {
-    console.error("Error saving score:", error);
-  } else {
-    console.log("Score saved to leaderboard!");
-  }
+  if (error) console.error("Error saving score:", error);
 }
 
-// Load leaderboard (only scores >= 20 trophies)
+// Load leaderboard
 async function loadLeaderboard() {
   const list = document.getElementById("leaderboard");
   list.innerHTML = "";
@@ -93,7 +84,6 @@ async function loadLeaderboard() {
   const { data, error } = await supabase
     .from("leaderboard")
     .select("*")
-    .gte("trophies", 20) // filter trophies >= 20
     .order("trophies", { ascending: false });
 
   if (error) {
@@ -103,7 +93,7 @@ async function loadLeaderboard() {
   }
 
   if (!data || data.length === 0) {
-    list.innerHTML = "<li>No scores yet (need ≥ 20 trophies)</li>";
+    list.innerHTML = "<li>No scores yet</li>";
     return;
   }
 
@@ -116,4 +106,5 @@ async function loadLeaderboard() {
 
 // Start game
 initBoard();
+
 
