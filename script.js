@@ -239,4 +239,3 @@ async function loadLeaderboard() {
 
 // -------------------- START GAME --------------------
 initBoard();
-
