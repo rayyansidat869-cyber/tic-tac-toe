@@ -31,6 +31,8 @@ function makeMove(index) {
     if (currentPlayer === "X") {
       trophies++;
       document.getElementById("trophies").textContent = `Trophies: ${trophies} 🏆`;
+
+      // ✅ Save score immediately after first win
       saveScore("Player", trophies);
     }
     return;
@@ -40,9 +42,9 @@ function makeMove(index) {
   currentPlayer = currentPlayer === "X" ? "O" : "X";
   document.getElementById("status").textContent = `${currentPlayer}'s turn`;
 
-  // If it's computer's turn, let it play
+  // If it's computer's turn, wait 1 second before moving
   if (currentPlayer === "O") {
-    computerMove();
+    setTimeout(computerMove, 1000); // ✅ delay added
   }
 }
 
