@@ -270,4 +270,8 @@ async function loadPlayerTrophies() {
 }
 
 // -------------------- START GAME --------------------
-document.addEventListener("
+document.addEventListener("DOMContentLoaded", async () => {
+  initBoard();
+  await loadPlayerTrophies();
+});
+
