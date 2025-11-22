@@ -5,7 +5,7 @@ const supabase = window.supabaseClient;
 let board = [];
 let currentPlayer = "X";
 let trophies = 0;
-let playerName = null; // ✅ store player name once
+let playerName = null; // store player name once
 
 // Initialize board
 function initBoard() {
@@ -33,12 +33,12 @@ function makeMove(index) {
       trophies++;
       document.getElementById("trophies").textContent = `Trophies: ${trophies} 🏆`;
 
-      // ✅ Ask for name only once
+      // Ask for name only once
       if (!playerName) {
         playerName = prompt("Enter your name:");
       }
 
-      // ✅ Save/update score immediately
+      // Save/update score immediately
       saveScore(playerName, trophies);
     }
     return;
@@ -48,9 +48,9 @@ function makeMove(index) {
   currentPlayer = currentPlayer === "X" ? "O" : "X";
   document.getElementById("status").textContent = `${currentPlayer}'s turn`;
 
-  // ✅ Computer waits 1 second before moving
+  // Computer waits 1 second before moving
   if (currentPlayer === "O") {
-    setTimeout(computerMove, 400);
+    setTimeout(computerMove, 1000);
   }
 }
 
@@ -77,8 +77,6 @@ function resetGame() {
   currentPlayer = "X";
   initBoard();
 }
-
-
 
 // -------------------- COMPUTER AI --------------------
 
@@ -193,19 +191,20 @@ function checkWinnerFor(player, b) {
 
 // -------------------- SUPABASE --------------------
 
-// ✅ Upsert ensures one row per player name
+// Save score to Supabase
 async function saveScore(name, trophies) {
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("leaderboard")
-    .upsert([{ name, trophies }], { onConflict: ["name"] });
+    .upsert([{ name, trophies }], { onConflict: "name" });
 
   if (error) {
     console.error("Error saving score:", error);
   } else {
-    console.log("Score updated in leaderboard!");
+    console.log("Score updated in leaderboard!", data);
   }
 }
 
+// Load leaderboard
 async function loadLeaderboard() {
   const list = document.getElementById("leaderboard");
   list.innerHTML = "";
@@ -233,5 +232,25 @@ async function loadLeaderboard() {
   });
 }
 
-// -------------------- START GAME --------------------
-initBoard();
+// Load player trophies on page start
+async function loadPlayerTrophies() {
+  if (!playerName) {
+    playerName = prompt("Enter your name:");
+  }
+
+  const { data, error } = await supabase
+    .from("leaderboard")
+    .select("trophies")
+    .eq("name", playerName)
+    .single();
+
+  if (error) {
+    console.error("Error loading trophies:", error);
+    trophies = 0;
+  } else if (data) {
+    trophies = data.trophies;
+  } else {
+    trophies = 0; // new player
+  }
+
+  document.getElementById("trophies").textContent = `Trophies: ${troph
