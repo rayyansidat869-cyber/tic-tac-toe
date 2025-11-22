@@ -61,7 +61,7 @@ function makeMove(index) {
   document.getElementById("status").textContent = `${currentPlayer}'s turn`;
 
   if (currentPlayer === "O") {
-    setTimeout(computerMove, 1000);
+    setTimeout(computerMove, 350);
   }
 }
 
