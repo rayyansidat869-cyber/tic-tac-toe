@@ -10,15 +10,17 @@ let playerName = null;
 // -------------------- INIT --------------------
 
 function initBoard() {
-  board = Array(9).fill(null);
+  board = Array(9).fill(null); // reset to 9 slots
   const boardDiv = document.getElementById("board");
-  boardDiv.innerHTML = "";
-  board.forEach((_, i) => {
+  boardDiv.innerHTML = ""; // clear old cells
+
+  for (let i = 0; i < 9; i++) {
     const cell = document.createElement("div");
     cell.classList.add("cell");
     cell.addEventListener("click", () => makeMove(i));
     boardDiv.appendChild(cell);
-  });
+  }
+
   document.getElementById("status").textContent = "Your turn";
 }
 
