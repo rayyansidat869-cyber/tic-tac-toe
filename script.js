@@ -253,7 +253,8 @@ async function loadPlayerTrophies() {
     trophies = 0; // new player
   }
 
-  document.getElementById("trophies").textContent = `Trophies: ${troph
+  document.getElementById("trophies").textContent = `Trophies: ${trophies} 🏆`;
+
 
   // -------------------- START GAME --------------------
 document.addEventListener("DOMContentLoaded", async () => {
