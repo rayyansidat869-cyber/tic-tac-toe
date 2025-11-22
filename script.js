@@ -50,7 +50,7 @@ function makeMove(index) {
 
   // ✅ Computer waits 1 second before moving
   if (currentPlayer === "O") {
-    setTimeout(computerMove, 1000);
+    setTimeout(computerMove, 400);
   }
 }
 
