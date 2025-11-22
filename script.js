@@ -15,6 +15,8 @@ function initBoard() {
     cell.classList.add("cell");
     cell.addEventListener("click", () => makeMove(i));
     boardDiv.appendChild(cell);
+initBoard();
+
   });
   document.getElementById("status").textContent = "Your turn";
 }
