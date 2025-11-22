@@ -36,8 +36,14 @@ function makeMove(index) {
     return;
   }
 
+  // Switch turn
   currentPlayer = currentPlayer === "X" ? "O" : "X";
   document.getElementById("status").textContent = `${currentPlayer}'s turn`;
+
+  // If it's computer's turn, let it play
+  if (currentPlayer === "O") {
+    computerMove();
+  }
 }
 
 // Render board
@@ -70,10 +76,134 @@ function resetTrophies() {
   document.getElementById("trophies").textContent = "Trophies: 0 🏆";
 }
 
+// -------------------- COMPUTER AI --------------------
+
+// Get selected difficulty
+function getDifficulty() {
+  return document.getElementById("mode").value;
+}
+
+// Computer move based on difficulty
+function computerMove() {
+  const difficulty = getDifficulty();
+
+  if (difficulty === "easy") {
+    randomMove();
+  } else if (difficulty === "hard") {
+    if (!tryWinOrBlock()) randomMove();
+  } else if (difficulty === "impossible") {
+    const best = minimax(board, "O").index;
+    board[best] = "O";
+  }
+
+  renderBoard();
+
+  if (checkWinner()) {
+    document.getElementById("status").textContent = "O wins!";
+    return;
+  }
+
+  currentPlayer = "X";
+  document.getElementById("status").textContent = "Your turn";
+}
+
+// Easy mode: random move
+function randomMove() {
+  const emptyCells = board
+    .map((val, i) => (val === null ? i : null))
+    .filter(i => i !== null);
+  if (emptyCells.length === 0) return;
+  const choice = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+  board[choice] = "O";
+}
+
+// Hard mode: try to win or block
+function tryWinOrBlock() {
+  const wins = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
+  for (let [a,b,c] of wins) {
+    // Try to win
+    if (board[a] === "O" && board[b] === "O" && !board[c]) { board[c] = "O"; return true; }
+    if (board[a] === "O" && board[c] === "O" && !board[b]) { board[b] = "O"; return true; }
+    if (board[b] === "O" && board[c] === "O" && !board[a]) { board[a] = "O"; return true; }
+    // Try to block
+    if (board[a] === "X" && board[b] === "X" && !board[c]) { board[c] = "O"; return true; }
+    if (board[a] === "X" && board[c] === "X" && !board[b]) { board[b] = "O"; return true; }
+    if (board[b] === "X" && board[c] === "X" && !board[a]) { board[a] = "O"; return true; }
+  }
+  return false;
+}
+
+// Impossible mode: minimax algorithm
+function minimax(newBoard, player) {
+  const availSpots = newBoard
+    .map((val, i) => (val === null ? i : null))
+    .filter(i => i !== null);
+
+  if (checkWinnerFor("X", newBoard)) return { score: -10 };
+  if (checkWinnerFor("O", newBoard)) return { score: 10 };
+  if (availSpots.length === 0) return { score: 0 };
+
+  const moves = [];
+  for (let i of availSpots) {
+    const move = { index: i };
+    newBoard[i] = player;
+
+    if (player === "O") {
+      const result = minimax(newBoard, "X");
+      move.score = result.score;
+    } else {
+      const result = minimax(newBoard, "O");
+      move.score = result.score;
+    }
+
+    newBoard[i] = null;
+    moves.push(move);
+  }
+
+  let bestMove;
+  if (player === "O") {
+    let bestScore = -Infinity;
+    moves.forEach((m, i) => {
+      if (m.score > bestScore) {
+        bestScore = m.score;
+        bestMove = i;
+      }
+    });
+  } else {
+    let bestScore = Infinity;
+    moves.forEach((m, i) => {
+      if (m.score < bestScore) {
+        bestScore = m.score;
+        bestMove = i;
+      }
+    });
+  }
+  return moves[bestMove];
+}
+
+function checkWinnerFor(player, b) {
+  const wins = [
+    [0,1,2],[3,4,5],[6,7,8],
+    [0,3,6],[1,4,7],[2,5,8],
+    [0,4,8],[2,4,6]
+  ];
+  return wins.some(([a,b,c]) => b[a] === player && b[b] === player && b[c] === player);
+}
+
+// -------------------- SUPABASE --------------------
+
 // Save score to Supabase
 async function saveScore(name, trophies) {
   const { error } = await supabase.from("leaderboard").insert([{ name, trophies }]);
-  if (error) console.error("Error saving score:", error);
+  if (error) {
+    console.error("Error saving score:", error);
+  } else {
+    console.log("Score saved to leaderboard!");
+  }
 }
 
 // Load leaderboard
@@ -104,7 +234,6 @@ async function loadLeaderboard() {
   });
 }
 
-// Start game
+// -------------------- START GAME --------------------
 initBoard();
-
 
