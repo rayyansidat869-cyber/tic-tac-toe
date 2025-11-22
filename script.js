@@ -5,6 +5,7 @@ const supabase = window.supabaseClient;
 let board = [];
 let currentPlayer = "X";
 let trophies = 0;
+let playerName = null; // ✅ store player name once
 
 // Initialize board
 function initBoard() {
@@ -32,8 +33,13 @@ function makeMove(index) {
       trophies++;
       document.getElementById("trophies").textContent = `Trophies: ${trophies} 🏆`;
 
-      // ✅ Save score immediately after first win
-      saveScore("Player", trophies);
+      // ✅ Ask for name only once
+      if (!playerName) {
+        playerName = prompt("Enter your name:");
+      }
+
+      // ✅ Save/update score immediately
+      saveScore(playerName, trophies);
     }
     return;
   }
@@ -42,9 +48,9 @@ function makeMove(index) {
   currentPlayer = currentPlayer === "X" ? "O" : "X";
   document.getElementById("status").textContent = `${currentPlayer}'s turn`;
 
-  // If it's computer's turn, wait 1 second before moving
+  // ✅ Computer waits 1 second before moving
   if (currentPlayer === "O") {
-    setTimeout(computerMove, 1000); // ✅ delay added
+    setTimeout(computerMove, 1000);
   }
 }
 
@@ -80,12 +86,10 @@ function resetTrophies() {
 
 // -------------------- COMPUTER AI --------------------
 
-// Get selected difficulty
 function getDifficulty() {
   return document.getElementById("mode").value;
 }
 
-// Computer move based on difficulty
 function computerMove() {
   const difficulty = getDifficulty();
 
@@ -109,7 +113,6 @@ function computerMove() {
   document.getElementById("status").textContent = "Your turn";
 }
 
-// Easy mode: random move
 function randomMove() {
   const emptyCells = board
     .map((val, i) => (val === null ? i : null))
@@ -119,7 +122,6 @@ function randomMove() {
   board[choice] = "O";
 }
 
-// Hard mode: try to win or block
 function tryWinOrBlock() {
   const wins = [
     [0,1,2],[3,4,5],[6,7,8],
@@ -127,11 +129,9 @@ function tryWinOrBlock() {
     [0,4,8],[2,4,6]
   ];
   for (let [a,b,c] of wins) {
-    // Try to win
     if (board[a] === "O" && board[b] === "O" && !board[c]) { board[c] = "O"; return true; }
     if (board[a] === "O" && board[c] === "O" && !board[b]) { board[b] = "O"; return true; }
     if (board[b] === "O" && board[c] === "O" && !board[a]) { board[a] = "O"; return true; }
-    // Try to block
     if (board[a] === "X" && board[b] === "X" && !board[c]) { board[c] = "O"; return true; }
     if (board[a] === "X" && board[c] === "X" && !board[b]) { board[b] = "O"; return true; }
     if (board[b] === "X" && board[c] === "X" && !board[a]) { board[a] = "O"; return true; }
@@ -139,7 +139,6 @@ function tryWinOrBlock() {
   return false;
 }
 
-// Impossible mode: minimax algorithm
 function minimax(newBoard, player) {
   const availSpots = newBoard
     .map((val, i) => (val === null ? i : null))
@@ -198,17 +197,19 @@ function checkWinnerFor(player, b) {
 
 // -------------------- SUPABASE --------------------
 
-// Save score to Supabase
+// ✅ Upsert ensures one row per player name
 async function saveScore(name, trophies) {
-  const { error } = await supabase.from("leaderboard").insert([{ name, trophies }]);
+  const { error } = await supabase
+    .from("leaderboard")
+    .upsert([{ name, trophies }], { onConflict: ["name"] });
+
   if (error) {
     console.error("Error saving score:", error);
   } else {
-    console.log("Score saved to leaderboard!");
+    console.log("Score updated in leaderboard!");
   }
 }
 
-// Load leaderboard
 async function loadLeaderboard() {
   const list = document.getElementById("leaderboard");
   list.innerHTML = "";
