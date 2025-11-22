@@ -1,12 +1,15 @@
+// Connect to Supabase
 const supabase = window.supabaseClient;
 
+// Game state
 let board = [];
 let currentPlayer = "X";
 let trophies = 0;
 let playerName = null;
 
+// -------------------- INIT --------------------
+
 function initBoard() {
-  console.log("initBoard called");
   board = Array(9).fill(null);
   const boardDiv = document.getElementById("board");
   boardDiv.innerHTML = "";
@@ -15,11 +18,11 @@ function initBoard() {
     cell.classList.add("cell");
     cell.addEventListener("click", () => makeMove(i));
     boardDiv.appendChild(cell);
-initBoard();
-
   });
   document.getElementById("status").textContent = "Your turn";
 }
+
+// -------------------- GAMEPLAY --------------------
 
 function makeMove(index) {
   if (board[index] || checkWinner()) return;
@@ -31,10 +34,18 @@ function makeMove(index) {
     if (currentPlayer === "X") {
       trophies++;
       document.getElementById("trophies").textContent = `Trophies: ${trophies} 🏆`;
+
+      // Ask for name only once, then save it
       if (!playerName) {
         playerName = prompt("Enter your name:");
+        if (playerName) {
+          localStorage.setItem("playerName", playerName);
+        }
       }
-      saveScore(playerName, trophies);
+
+      if (playerName) {
+        saveScore(playerName, trophies);
+      }
     }
     return;
   }
@@ -68,6 +79,8 @@ function resetGame() {
   initBoard();
 }
 window.resetGame = resetGame;
+
+// -------------------- COMPUTER AI --------------------
 
 function getDifficulty() {
   return document.getElementById("mode").value;
@@ -220,8 +233,15 @@ async function loadLeaderboard() {
 }
 
 async function loadPlayerTrophies() {
+  // Restore name from localStorage if available
   if (!playerName) {
-    playerName = prompt("Enter your name:");
+    playerName = localStorage.getItem("playerName");
+  }
+
+  if (!playerName) {
+    trophies = 0;
+    document.getElementById("trophies").textContent = `Trophies: ${trophies} 🏆`;
+    return;
   }
 
   const { data, error } = await supabase
@@ -243,8 +263,4 @@ async function loadPlayerTrophies() {
 }
 
 // -------------------- START GAME --------------------
-document.addEventListener("DOMContentLoaded", async () => {
-  initBoard();
-  await loadPlayerTrophies();
-});
-
+document.addEventListener("
