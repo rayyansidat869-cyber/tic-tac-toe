@@ -10,19 +10,24 @@ let playerName = null;
 // -------------------- INIT --------------------
 
 function initBoard() {
-  board = Array(9).fill(null); // reset to 9 slots
+  board = Array(9).fill(null); 
   const boardDiv = document.getElementById("board");
-  boardDiv.innerHTML = ""; // clear old cells
+  boardDiv.innerHTML = "";
+
+  console.log("initBoard called. Building cells...");
 
   for (let i = 0; i < 9; i++) {
     const cell = document.createElement("div");
     cell.classList.add("cell");
     cell.addEventListener("click", () => makeMove(i));
     boardDiv.appendChild(cell);
+    console.log(`Cell ${i} created`);
   }
 
+  console.log("Board now has", boardDiv.children.length, "cells");
   document.getElementById("status").textContent = "Your turn";
 }
+
 
 // -------------------- GAMEPLAY --------------------
 
