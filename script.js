@@ -78,11 +78,7 @@ function resetGame() {
   initBoard();
 }
 
-// Reset trophies
-function resetTrophies() {
-  trophies = 0;
-  document.getElementById("trophies").textContent = "Trophies: 0 🏆";
-}
+
 
 // -------------------- COMPUTER AI --------------------
 
