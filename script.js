@@ -254,3 +254,10 @@ async function loadPlayerTrophies() {
   }
 
   document.getElementById("trophies").textContent = `Trophies: ${troph
+
+  // -------------------- START GAME --------------------
+document.addEventListener("DOMContentLoaded", async () => {
+  initBoard();             // render the board
+  await loadPlayerTrophies(); // restore trophies from Supabase
+});
+
