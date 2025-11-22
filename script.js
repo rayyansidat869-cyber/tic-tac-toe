@@ -209,6 +209,7 @@ async function saveScore(name, trophies) {
     console.error("Error saving score:", error);
   } else {
     console.log("Score updated in leaderboard!", data);
+    loadLeaderboard(); // ✅ auto-refresh leaderboard after saving
   }
 }
 
