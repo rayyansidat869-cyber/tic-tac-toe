@@ -28,7 +28,6 @@ function renderBoard() {
   const cells = document.querySelectorAll(".cell");
   board.forEach((val, i) => {
     cells[i].textContent = val || "";
-    if (highlight.includes(i)) cells[i].style.backgroundColor = "gold"; // ✅ one line
   });
 }
 
