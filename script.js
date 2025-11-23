@@ -272,6 +272,7 @@ async function loadPlayerTrophies() {
 
 // -------------------- START GAME --------------------
 document.addEventListener("DOMContentLoaded", async () => {
+  console.log("DOM loaded, starting game"); // ✅ debug
   initBoard();               // build the 9 cells immediately
   await loadPlayerTrophies(); // restore trophies if name exists
   await loadLeaderboard();    // show leaderboard right away
