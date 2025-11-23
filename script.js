@@ -10,24 +10,19 @@ let playerName = null;
 // -------------------- INIT --------------------
 
 function initBoard() {
-  board = Array(9).fill(null); 
+  board = Array(9).fill(null);
   const boardDiv = document.getElementById("board");
   boardDiv.innerHTML = "";
-
-  console.log("initBoard called. Building cells...");
 
   for (let i = 0; i < 9; i++) {
     const cell = document.createElement("div");
     cell.classList.add("cell");
     cell.addEventListener("click", () => makeMove(i));
     boardDiv.appendChild(cell);
-    console.log(`Cell ${i} created`);
   }
 
-  console.log("Board now has", boardDiv.children.length, "cells");
   document.getElementById("status").textContent = "Your turn";
 }
-
 
 // -------------------- GAMEPLAY --------------------
 
@@ -36,13 +31,21 @@ function makeMove(index) {
   board[index] = currentPlayer;
   renderBoard();
 
-  if (checkWinner()) {
+  const winningCombo = checkWinner();
+  if (winningCombo) {
     document.getElementById("status").textContent = `${currentPlayer} wins!`;
+
     if (currentPlayer === "X") {
-      trophies++;
+      // ✅ Trophy rewards scale by difficulty
+      const difficulty = getDifficulty();
+      let reward = 0;
+      if (difficulty === "easy") reward = 2;
+      if (difficulty === "hard") reward = 10;
+      if (difficulty === "impossible") reward = 1000;
+
+      trophies += reward;
       document.getElementById("trophies").textContent = `Trophies: ${trophies} 🏆`;
 
-      // Ask for name only once, then save it
       if (!playerName) {
         playerName = prompt("Enter your name:");
         if (playerName) {
@@ -61,7 +64,7 @@ function makeMove(index) {
   document.getElementById("status").textContent = `${currentPlayer}'s turn`;
 
   if (currentPlayer === "O") {
-    setTimeout(computerMove, 350);
+    setTimeout(computerMove, 1000);
   }
 }
 
@@ -78,7 +81,12 @@ function checkWinner() {
     [0,3,6],[1,4,7],[2,5,8],
     [0,4,8],[2,4,6]
   ];
-  return wins.some(([a,b,c]) => board[a] && board[a] === board[b] && board[a] === board[c]);
+  for (let [a,b,c] of wins) {
+    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+      return [a, b, c];
+    }
+  }
+  return null;
 }
 
 function resetGame() {
@@ -102,12 +110,15 @@ function computerMove() {
     if (!tryWinOrBlock()) randomMove();
   } else if (difficulty === "impossible") {
     const best = minimax(board, "O").index;
-    board[best] = "O";
+    if (best !== null && best !== undefined) {
+      board[best] = "O";
+    }
   }
 
   renderBoard();
 
-  if (checkWinner()) {
+  const winningCombo = checkWinner();
+  if (winningCombo) {
     document.getElementById("status").textContent = "O wins!";
     return;
   }
@@ -147,22 +158,17 @@ function minimax(newBoard, player) {
     .map((val, i) => (val === null ? i : null))
     .filter(i => i !== null);
 
-  if (checkWinnerFor("X", newBoard)) return { score: -10 };
-  if (checkWinnerFor("O", newBoard)) return { score: 10 };
-  if (availSpots.length === 0) return { score: 0 };
+  if (checkWinnerFor("X", newBoard)) return { score: -10, index: null };
+  if (checkWinnerFor("O", newBoard)) return { score: 10, index: null };
+  if (availSpots.length === 0) return { score: 0, index: null };
 
   const moves = [];
   for (let i of availSpots) {
     const move = { index: i };
     newBoard[i] = player;
 
-    if (player === "O") {
-      const result = minimax(newBoard, "X");
-      move.score = result.score;
-    } else {
-      const result = minimax(newBoard, "O");
-      move.score = result.score;
-    }
+    const result = minimax(newBoard, player === "O" ? "X" : "O");
+    move.score = result.score;
 
     newBoard[i] = null;
     moves.push(move);
@@ -209,7 +215,7 @@ async function saveScore(name, trophies) {
     console.error("Error saving score:", error);
   } else {
     console.log("Score updated in leaderboard!", data);
-    loadLeaderboard(); // ✅ auto-refresh leaderboard after saving
+    loadLeaderboard(); // ✅ auto-refresh leaderboard
   }
 }
 
@@ -241,38 +247,19 @@ async function loadLeaderboard() {
 }
 
 async function loadPlayerTrophies() {
-  // Restore name from localStorage if available
   if (!playerName) {
     playerName = localStorage.getItem("playerName");
   }
 
   if (!playerName) {
     trophies = 0;
-    document.getElementById("trophies").textContent = `Trophies: ${trophies} 🏆`;
-    return;
-  }
-
-  const { data, error } = await supabase
-    .from("leaderboard")
-    .select("trophies")
-    .eq("name", playerName)
-    .single();
-
-  if (error) {
-    console.error("Error loading trophies:", error);
-    trophies = 0;
-  } else if (data) {
-    trophies = data.trophies;
-  } else {
-    trophies = 0;
-  }
-
-  document.getElementById("trophies").textContent = `Trophies: ${trophies} 🏆`;
-}
+    document.getElementById("trophies").textContent = `Trophies: ${trophies}
 
 // -------------------- START GAME --------------------
 document.addEventListener("DOMContentLoaded", async () => {
-  initBoard();
-  await loadPlayerTrophies();
+  initBoard();             // build the 9 cells immediately
+  await loadPlayerTrophies(); // restore trophies if name exists
+  await loadLeaderboard();    // show leaderboard right away
 });
+
 
