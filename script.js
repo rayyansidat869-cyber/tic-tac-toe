@@ -253,13 +253,32 @@ async function loadPlayerTrophies() {
 
   if (!playerName) {
     trophies = 0;
-    document.getElementById("trophies").textContent = `Trophies: ${trophies}
+    document.getElementById("trophies").textContent = `Trophies: ${trophies} 🏆`;
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from("leaderboard")
+    .select("trophies")
+    .eq("name", playerName)
+    .single();
+
+  if (error) {
+    console.error("Error loading trophies:", error);
+    trophies = 0;
+  } else if (data) {
+    trophies = data.trophies;
+  }
+
+  document.getElementById("trophies").textContent = `Trophies: ${trophies} 🏆`;
+}
 
 // -------------------- START GAME --------------------
 document.addEventListener("DOMContentLoaded", async () => {
-  initBoard();             // build the 9 cells immediately
+  initBoard();               // build the 9 cells immediately
   await loadPlayerTrophies(); // restore trophies if name exists
   await loadLeaderboard();    // show leaderboard right away
 });
+
 
 
