@@ -24,10 +24,24 @@ function initBoard() {
   document.getElementById("status").textContent = "Your turn";
 }
 
+function renderBoard() {
+  const cells = document.querySelectorAll(".cell");
+  board.forEach((val, i) => {
+    cells[i].textContent = val || "";
+  });
+}
+
+function resetGame() {
+  currentPlayer = "X";
+  initBoard();
+}
+window.resetGame = resetGame;
+
 // -------------------- GAMEPLAY --------------------
 
 function makeMove(index) {
   if (board[index] || checkWinner()) return;
+
   board[index] = currentPlayer;
   renderBoard();
 
@@ -36,7 +50,6 @@ function makeMove(index) {
     document.getElementById("status").textContent = `${currentPlayer} wins!`;
 
     if (currentPlayer === "X") {
-      // ✅ Trophy rewards scale by difficulty
       const difficulty = getDifficulty();
       let reward = 0;
       if (difficulty === "easy") reward = 2;
@@ -48,14 +61,10 @@ function makeMove(index) {
 
       if (!playerName) {
         playerName = prompt("Enter your name:");
-        if (playerName) {
-          localStorage.setItem("playerName", playerName);
-        }
+        if (playerName) localStorage.setItem("playerName", playerName);
       }
 
-      if (playerName) {
-        saveScore(playerName, trophies);
-      }
+      if (playerName) saveScore(playerName, trophies);
     }
     return;
   }
@@ -64,41 +73,29 @@ function makeMove(index) {
   document.getElementById("status").textContent = `${currentPlayer}'s turn`;
 
   if (currentPlayer === "O") {
-    setTimeout(computerMove, 1000);
+    setTimeout(computerMove, 400);
   }
 }
 
-function renderBoard() {
-  const cells = document.querySelectorAll(".cell");
-  board.forEach((val, i) => {
-    cells[i].textContent = val || "";
-  });
-}
-
-function checkWinnerFor(player, board) {
+function checkWinner() {
   const wins = [
     [0,1,2],[3,4,5],[6,7,8],
     [0,3,6],[1,4,7],[2,5,8],
     [0,4,8],[2,4,6]
   ];
-  return wins.some(([a, b, c]) =>
-    board[a] === player && board[b] === player && board[c] === player
-  );
-}
-
+  for (let [a,b,c] of wins) {
+    if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+      return [a, b, c];
+    }
+  }
   return null;
 }
-
-function resetGame() {
-  currentPlayer = "X";
-  initBoard();
-}
-window.resetGame = resetGame;
 
 // -------------------- COMPUTER AI --------------------
 
 function getDifficulty() {
-  return document.getElementById("mode").value;
+  const el = document.getElementById("mode");
+  return el ? el.value : "easy";
 }
 
 function computerMove() {
@@ -109,9 +106,12 @@ function computerMove() {
   } else if (difficulty === "hard") {
     if (!tryWinOrBlock()) randomMove();
   } else if (difficulty === "impossible") {
-    const best = minimax(board, "O").index;
-    if (best !== null && best !== undefined) {
-      board[best] = "O";
+    const best = minimax(board.slice(), "O"); // use a copy for safety
+    if (best && best.index !== null && best.index !== undefined) {
+      board[best.index] = "O";
+    } else {
+      // Fallback if minimax returns nothing
+      randomMove();
     }
   }
 
@@ -128,11 +128,9 @@ function computerMove() {
 }
 
 function randomMove() {
-  const emptyCells = board
-    .map((val, i) => (val === null ? i : null))
-    .filter(i => i !== null);
-  if (emptyCells.length === 0) return;
-  const choice = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+  const empty = board.map((v, i) => (v === null ? i : null)).filter(i => i !== null);
+  if (empty.length === 0) return;
+  const choice = empty[Math.floor(Math.random() * empty.length)];
   board[choice] = "O";
 }
 
@@ -142,10 +140,13 @@ function tryWinOrBlock() {
     [0,3,6],[1,4,7],[2,5,8],
     [0,4,8],[2,4,6]
   ];
+
   for (let [a,b,c] of wins) {
+    // Try to win
     if (board[a] === "O" && board[b] === "O" && !board[c]) { board[c] = "O"; return true; }
     if (board[a] === "O" && board[c] === "O" && !board[b]) { board[b] = "O"; return true; }
     if (board[b] === "O" && board[c] === "O" && !board[a]) { board[a] = "O"; return true; }
+    // Block X
     if (board[a] === "X" && board[b] === "X" && !board[c]) { board[c] = "O"; return true; }
     if (board[a] === "X" && board[c] === "X" && !board[b]) { board[b] = "O"; return true; }
     if (board[b] === "X" && board[c] === "X" && !board[a]) { board[a] = "O"; return true; }
@@ -153,55 +154,52 @@ function tryWinOrBlock() {
   return false;
 }
 
-function minimax(newBoard, player) {
-  const availSpots = newBoard
-    .map((val, i) => (val === null ? i : null))
-    .filter(i => i !== null);
+function minimax(state, player) {
+  const empty = state.map((v, i) => (v === null ? i : null)).filter(i => i !== null);
 
-  if (checkWinnerFor("X", newBoard)) return { score: -10, index: null };
-  if (checkWinnerFor("O", newBoard)) return { score: 10, index: null };
-  if (availSpots.length === 0) return { score: 0, index: null };
+  if (checkWinnerFor("X", state)) return { score: -10, index: null };
+  if (checkWinnerFor("O", state)) return { score: 10, index: null };
+  if (empty.length === 0) return { score: 0, index: null };
 
   const moves = [];
-  for (let i of availSpots) {
-    const move = { index: i };
-    newBoard[i] = player;
 
-    const result = minimax(newBoard, player === "O" ? "X" : "O");
+  for (let i of empty) {
+    const move = { index: i };
+    state[i] = player;
+
+    const result = minimax(state, player === "O" ? "X" : "O");
     move.score = result.score;
 
-    newBoard[i] = null;
+    state[i] = null;
     moves.push(move);
   }
 
-  let bestMove;
+  let bestMoveIndex = 0;
+
   if (player === "O") {
     let bestScore = -Infinity;
-    moves.forEach((m, i) => {
-      if (m.score > bestScore) {
-        bestScore = m.score;
-        bestMove = i;
-      }
-    });
+    for (let i = 0; i < moves.length; i++) {
+      if (moves[i].score > bestScore) { bestScore = moves[i].score; bestMoveIndex = i; }
+    }
   } else {
     let bestScore = Infinity;
-    moves.forEach((m, i) => {
-      if (m.score < bestScore) {
-        bestScore = m.score;
-        bestMove = i;
-      }
-    });
+    for (let i = 0; i < moves.length; i++) {
+      if (moves[i].score < bestScore) { bestScore = moves[i].score; bestMoveIndex = i; }
+    }
   }
-  return moves[bestMove];
+
+  return moves[bestMoveIndex];
 }
 
-function checkWinnerFor(player, b) {
+function checkWinnerFor(player, boardArr) {
   const wins = [
     [0,1,2],[3,4,5],[6,7,8],
     [0,3,6],[1,4,7],[2,5,8],
     [0,4,8],[2,4,6]
   ];
-  return wins.some(([a,b,c]) => b[a] === player && b[b] === player && b[c] === player);
+  return wins.some(([a, b, c]) =>
+    boardArr[a] === player && boardArr[b] === player && boardArr[c] === player
+  );
 }
 
 // -------------------- SUPABASE --------------------
@@ -214,8 +212,7 @@ async function saveScore(name, trophies) {
   if (error) {
     console.error("Error saving score:", error);
   } else {
-    console.log("Score updated in leaderboard!", data);
-    loadLeaderboard(); // ✅ auto-refresh leaderboard
+    loadLeaderboard();
   }
 }
 
@@ -279,6 +276,3 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadPlayerTrophies(); // restore trophies if name exists
   await loadLeaderboard();    // show leaderboard right away
 });
-
-
-
