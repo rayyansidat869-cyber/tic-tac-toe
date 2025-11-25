@@ -7,6 +7,7 @@ A browser-based Tic Tac Toe game with Easy and Hard And Impossible AI modes. Bui
 - Difficulty selector
 - Responsive design
 - Stylish animations
+-  live Leaderboard
 
 ## Live Demo
 [Play it here](https://rayyansidat869-cyber.github.io/tic-tac-toe/)
